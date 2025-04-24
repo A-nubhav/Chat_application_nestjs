@@ -10,18 +10,17 @@ export class MessageService {
 
     constructor(@InjectModel(UserMessages.name) private UserMessagesSchema: Model<UserMessages>, @InjectModel(UserFriendList.name) private UserFriendSchema: Model<UserFriendList>,
         private helperService: helperService) { }
-    async sendMessages(authToken: string, data: Record<string,any>) {
-        if (!authToken) {
-            return "token required";
-        }
-        const decodedData = await this.helperService.verifyToken(authToken);
-        if (decodedData.error) {
-            return "INVALID TOKEN";
-        }
-        const isFriend=await this.UserFriendSchema.findOne({userReciever:decodedData.email,userSender:data.email,requestStatus:1});
+    async sendMessages(user, data: Record<string,any>) {
+        const isFriend = await this.UserFriendSchema.findOne({
+            requestStatus: 1,
+            $or: [
+              { userSender: user.email, userReciever: data.email },
+              { userSender: data.email, userReciever: user.email },
+            ],
+          });
         if(isFriend){
           const messageSent= await this.UserMessagesSchema.create({
-                senderIDEmail:decodedData.email,
+                senderIDEmail:user.email,
                 receiverIDEmail:data.email,
                 message:data.message
             });
@@ -32,16 +31,9 @@ export class MessageService {
 
     }
 
-    async getMessages(authToken: string, query: Record<string, any>,param:string) {
-        if (!authToken) {
-            return "token required";
-        }
-        const decodedData = await this.helperService.verifyToken(authToken);
-        if (decodedData.error) {
-            return "INVALID TOKEN";
-        }
+    async getMessages(user, query: Record<string, any>,param:string) {
         const skip = ((query.page) - 1) * (query.limit);
-        const receivedMessages=await this.UserMessagesSchema.find({senderIDEmail:param,receiverIDEmail:decodedData.email})
+        const receivedMessages=await this.UserMessagesSchema.find({senderIDEmail:param,receiverIDEmail:user.email},{message:1})
         .skip(skip)
         .limit(query.limit)
         .sort({ createdAt: -1 });

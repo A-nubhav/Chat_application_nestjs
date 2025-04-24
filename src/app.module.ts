@@ -13,6 +13,7 @@ import { ContactModule } from './contact/contact.module';
 // import { ContactModule } from './contact/contact.module';
 import { MessageModule } from './message/message.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { RedisModule } from '@nestjs-modules/ioredis';
 
 @Module({
   imports: [
@@ -31,8 +32,9 @@ import { ThrottlerModule } from '@nestjs/throttler';
       ttl: 60000, // 1 minute window
       limit: 5,    // 5 requests per window
     }]),
-    AuthModule,UserModule,ContactModule, MessageModule,MessageModule],
+    AuthModule,UserModule,ContactModule, MessageModule,RedisModule],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService]
+
 })
 export class AppModule {}

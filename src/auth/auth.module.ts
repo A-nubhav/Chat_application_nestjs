@@ -6,9 +6,13 @@ import { User, UserSchema } from 'src/schema/userProfile.schema';
 import { helperModule } from 'src/helper/helper.module';
 import { AuthService } from './auth.service';
 
+import { RedisModule } from 'src/redis/redis.module';
+import { UserSession, UserSessionSchema } from 'src/schema/userSession.schema';
+
+
 @Module({
-  imports:[ MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),helperModule],
-  controllers: [AuthController],
+  imports:[ MongooseModule.forFeature([{ name: User.name, schema: UserSchema },{name:UserSession.name,schema:UserSessionSchema}]),helperModule,RedisModule],
+  controllers: [AuthController],  
   providers:[AuthService]
 })
 export class AuthModule {}

@@ -1,13 +1,18 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
+// import { GuardGuard } from 'src/guard/guard.guard';
+// import { JwtAuthGuard } from 'src/auth/guards/jwt-guard.guard';
+import { jwtGuard } from 'src/guards/jwt-guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('user')
 export class UserController {
     constructor(private userservice:UserService){}
+
+    @ApiBearerAuth('JWT')
+    @UseGuards(jwtGuard)
     @Get("/profile")
-    getProfile(@Req() request:Request){
-     const { authorization }: any = request.headers;
-     const authToken = authorization.replace(/bearer/gim, '').trim();
-     return this.userservice.getProfile(authToken);
+    getProfile(@Req() request){
+     return this.userservice.getProfile(request.user);
     }
 }
